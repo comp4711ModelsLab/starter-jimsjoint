@@ -49,12 +49,26 @@ class Orders extends MY_Model {
 
     // retrieve the details for an order
     function details($num) {
-        
+        $items = $this->orderitems->group($num);
+
+        foreach ( $items as $item )
+        {
+            $menuitem = $this->menu->get($item->item);
+            $item->code = $menuitem->name;
+        }
+
+        return $items;
     }
 
     // cancel an order
     function flush($num) {
-        
+        // Update the order to canceled status
+        $order = $this->get($num);
+        $order->status = 'x';
+        $this->update($order);
+
+        // Delete all order items related to the order
+        $this->orderitems->delete_some($num);
     }
 
     // validate an order
